@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Student Analytics</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+background:#f1f5f9;
+}
+
+.container-box{
+max-width:900px;
+margin:auto;
+margin-top:40px;
+}
+
+.card{
+border-radius:14px;
+box-shadow:0 10px 25px rgba(0,0,0,0.1);
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+
+<div class="container-box">
+
+<h3 class="text-center mb-4">Student Risk Analysis</h3>
+
+<div class="card p-4 mb-4 text-center">
+
+<h4>Prediction Summary</h4>
+
+<h2>{{ predicted_grade }}/20</h2>
+
+{% if risk=="High" %}
+<span class="badge bg-danger">High Risk</span>
+{% elif risk=="Medium" %}
+<span class="badge bg-warning">Medium Risk</span>
+{% else %}
+<span class="badge bg-success">Low Risk</span>
+{% endif %}
+
+</div>
+
+<div class="card p-4 mb-4">
+
+<h5>Student Features</h5>
+
+<ul>
+
+<li>G1: {{ student.G1 }}</li>
+<li>G2: {{ student.G2 }}</li>
+<li>Study Time: {{ student.studytime }}</li>
+<li>Failures: {{ student.failures }}</li>
+<li>Absences: {{ student.absences }}</li>
+
+</ul>
+
+</div>
+
+<div class="card p-4 mb-4">
+
+<h5>Performance Indicator</h5>
+
+<div class="progress">
+
+{% if risk=="High" %}
+<div class="progress-bar bg-danger"
+{% elif risk=="Medium" %}
+<div class="progress-bar bg-warning"
+{% else %}
+<div class="progress-bar bg-success"
+{% endif %}
+
+style="width: {{ (predicted_grade/20)*100 }}%">
+
+{{ (predicted_grade/20*100)|round(1) }}%
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card p-4">
+
+<h5>Feature Contribution Analysis</h5>
+
+<canvas id="importanceChart"></canvas>
+
+</div>
+
+
+<div class="card p-4 ">
+
+
+
+<h5>Student vs Class Average</h5>
+
+<canvas id="comparisonChart"></canvas>
+
+</div>
+
+<h5>AI Recommended Intervention</h5>
+
+<ul>
+
+{% if risk=="High" %}
+
+<li>Immediate academic counseling recommended.</li>
+<li>Provide structured tutoring sessions.</li>
+<li>Monitor attendance closely to reduce absences.</li>
+<li>Create a weekly study plan for the student.</li>
+
+{% elif risk=="Medium" %}
+
+<li>Encourage regular study habits to improve performance.</li>
+<li>Review weak subject areas identified from internal exams.</li>
+<li>Provide light mentoring or peer learning sessions.</li>
+<li>Track progress in upcoming assessments.</li>
+
+{% else %}
+
+<li>Good academic performance observed.</li>
+<li>Encourage participation in advanced learning activities.</li>
+<li>Maintain consistent study routine.</li>
+<li>Provide opportunities for skill development.</li>
+
+{% endif %}
+
+</ul>
+
+
+
+<div class="card p-4 mb-4">
+
+<h5>AI Feedback</h5>
+
+{% if risk=="High" %}
+
+<p class="text-danger">
+The student is currently at high academic risk. Early intervention such as tutoring, mentoring, and improved attendance can significantly improve performance.
+</p>
+
+{% elif risk=="Medium" %}
+
+<p class="text-warning">
+The student is performing at a moderate level. With better consistency in study time and improved exam preparation, the student can achieve higher grades.
+</p>
+
+{% else %}
+
+<p class="text-success">
+Good going! The student is performing well academically. Encourage them to maintain their study habits and explore advanced learning opportunities.
+</p>
+
+{% endif %}
+
+</div>
+
+
+<script>
+
+let importance = {{ importance|tojson }}
+
+let labels = ["G1","G2","Study Time","Failures","Absences"]
+
+new Chart(document.getElementById("importanceChart"),{
+
+type:"bar",
+
+data:{
+labels:labels,
+datasets:[{
+label:"Feature Importance",
+data:importance,
+backgroundColor:"#2563eb"
+}]
+}
+
+})
+
+let studentValues = [
+{{ student.G1 }},
+{{ student.G2 }},
+{{ student.studytime }},
+{{ student.failures }},
+{{ student.absences }}
+]
+
+let avgValues = [
+{{ avg_g1 }},
+{{ avg_g2 }},
+{{ avg_study }},
+{{ avg_fail }},
+{{ avg_abs }}
+]
+
+new Chart(document.getElementById("comparisonChart"),{
+
+type:"bar",
+
+data:{
+labels:["G1","G2","Study Time","Failures","Absences"],
+
+datasets:[
+{
+label:"Student",
+data:studentValues,
+backgroundColor:"#2563eb"
+},
+
+{
+label:"Class Average",
+data:avgValues,
+backgroundColor:"#94a3b8"
+}
+]
+}
+
+})
+
+</script>
+
+</body>
+</html>
